@@ -15,8 +15,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // useRegisterServiceWorker();
-
   return (
     <html lang="en">
       <body className={inter.className}>

@@ -71,11 +71,11 @@ export async function requestNotificationPermission(): Promise<boolean> {
   }
 }
 
-// // Legacy function for backward compatibility
-// export function listenToMessages(callback: (payload: any) => void) {
-//   const messaging = getMessaging(firebaseApp);
-//   return onMessage(messaging, callback);
-// }
+// Legacy function for backward compatibility
+export function listenToMessages(callback: (payload: any) => void) {
+  const messaging = getMessaging(firebaseApp);
+  return onMessage(messaging, callback);
+}
 
 export function useRegisterServiceWorker() {
   useEffect(() => {
