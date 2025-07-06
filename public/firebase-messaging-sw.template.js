@@ -59,35 +59,12 @@ self.addEventListener("notificationclick", function (event) {
         const allClients = await clients.matchAll();
         const focusedClient = allClients.find((client) => client.focused);
 
-        switch (data.action) {
-          case "open_url":
-            if (data.url) {
-              if (focusedClient) {
-                focusedClient.postMessage({ type: "open_url", url: data.url });
-              } else {
-                await clients.openWindow(data.url);
-              }
-            }
-            break;
-          case "navigate":
-            if (data.route) {
-              const targetUrl = new URL(data.route, self.location.origin).href;
-              if (focusedClient) {
-                focusedClient.navigate(targetUrl);
-              } else {
-                await clients.openWindow(targetUrl);
-              }
-            }
-            break;
-          case "refresh":
-            if (focusedClient) {
-              focusedClient.reload();
-            } else {
-              await clients.openWindow(self.location.origin);
-            }
-            break;
-          default:
-            await clients.openWindow(new URL("/", self.location.origin).href);
+        const targetUrl = new URL(data.url, self.location.origin).href;
+
+        if (focusedClient) {
+          focusedClient.navigate(targetUrl);
+        } else {
+          await clients.openWindow(targetUrl);
         }
       })()
     );

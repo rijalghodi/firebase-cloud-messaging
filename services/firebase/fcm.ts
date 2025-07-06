@@ -1,13 +1,9 @@
 "use client";
 
 import firebaseApp from "@/services/firebase/firebase";
-import {
-  getMessaging,
-  getToken,
-  MessagePayload,
-  onMessage,
-} from "firebase/messaging";
+import { getMessaging, getToken, MessagePayload, onMessage } from "firebase/messaging";
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 export async function requestFCMToken(): Promise<string | null> {
   try {
@@ -30,50 +26,24 @@ export function useForegroundNotifications() {
     const unsubscribe = onMessage(messaging, (payload: MessagePayload) => {
       console.log("Foreground message received:", payload);
 
-      const title = payload.notification?.title || "New Message";
+      const title = payload.notification?.title || "";
       const body = payload.notification?.body || "";
       const data = payload.data;
 
-      // Show simple alert with notification details
-      let alertMessage = `${title}\n\n${body}`;
-
-      // Add data information if available
-      if (data && Object.keys(data).length > 0) {
-        alertMessage += `\n\nData: ${JSON.stringify(data, null, 2)}`;
-      }
-
       // Show the alert
-      alert(alertMessage);
-
-      // Handle custom actions if present
-      if (data?.action) {
-        handleNotificationAction(data.action, data);
-      }
+      toast(title, {
+        description: body,
+        action: {
+          label: "Open",
+          onClick: () => {
+            window.location.href = data?.url || "/";
+          },
+        },
+      });
     });
 
     return () => unsubscribe();
   }, []);
-}
-
-// Handle notification actions
-function handleNotificationAction(action: string, data: Record<string, any>) {
-  switch (action) {
-    case "open_url":
-      if (data.url) {
-        window.open(data.url, "_blank");
-      }
-      break;
-    case "navigate":
-      if (data.route) {
-        window.location.href = data.route;
-      }
-      break;
-    case "refresh":
-      window.location.reload();
-      break;
-    default:
-      console.log("Unknown notification action:", action);
-  }
 }
 
 // Request notification permission
@@ -101,11 +71,11 @@ export async function requestNotificationPermission(): Promise<boolean> {
   }
 }
 
-// Legacy function for backward compatibility
-export function listenToMessages(callback: (payload: any) => void) {
-  const messaging = getMessaging(firebaseApp);
-  return onMessage(messaging, callback);
-}
+// // Legacy function for backward compatibility
+// export function listenToMessages(callback: (payload: any) => void) {
+//   const messaging = getMessaging(firebaseApp);
+//   return onMessage(messaging, callback);
+// }
 
 export function useRegisterServiceWorker() {
   useEffect(() => {

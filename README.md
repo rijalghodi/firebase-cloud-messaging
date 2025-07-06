@@ -15,24 +15,25 @@ Check out the live demo: [https://firebase-cloud-messaging-demo.vercel.app/](htt
 
 ## 🎯 How to Test
 
-### 1. **Grant Permission**
+### 1. **Subscribe to Notifications**
 
-Click "Grant Permission" when prompted to allow notifications.
+Click "Subscribe to Notifications" to grant permission and get your unique Firebase token.
 
-### 2. **Test Different Notification Types**
+### 2. **Send Notifications**
 
-- **Basic** - Simple message notification
-- **Action** - Opens a URL in new tab
-- **Navigate** - Takes you to a specific page
-- **Refresh** - Reloads the current page
-- **Custom Data** - Shows extra information
+1. Fill in the notification form:
+   - **Title** - The notification heading
+   - **Body** - The notification message
+   - **URL** (Optional) - Link to open when notification is clicked
+2. Click "Send Notification" to see it appear
+3. Try clicking the notification to test different actions
 
 ### 3. **Cross-Device Testing**
 
 1. Open the app on two devices (phone + laptop, or two browsers)
-2. Grant permission on both devices
-3. Copy the FCM token from one device
-4. Paste it in the "Target Token" field on the other device
+2. Subscribe to notifications on both devices
+3. Copy the Firebase token from one device
+4. Check "Use Cross-Device Firebase Token" and paste the token
 5. Send notifications between devices!
 
 ## 🛠️ Local Setup
@@ -49,6 +50,8 @@ Click "Grant Permission" when prompted to allow notifications.
 3. Add a web app
 4. Go to Project Settings → Service Accounts
 5. Generate a new private key (download JSON file)
+6. Go to Project Settings → Cloud Messaging → Web Push certificates
+7. Generate a new key pair and copy the VAPID key
 
 ### 2. **Environment Variables**
 
@@ -86,6 +89,46 @@ npm run dev
 npm run build
 npm start
 ```
+
+## 🔧 How It Works
+
+### Foreground Notifications
+
+When the app is open, notifications appear as browser alerts with custom actions.
+
+### Background Notifications
+
+When the app is closed, the service worker shows system notifications that can open the app when clicked.
+
+### Cross-Device Messaging
+
+Each device gets a unique FCM token. Use this token to send notifications to specific devices.
+
+## 📁 Project Structure
+
+```
+├── app/
+│   ├── components/          # React components
+│   ├── api/                # API routes for sending notifications
+│   └── page.tsx            # Main demo page
+├── services/firebase/      # Firebase configuration
+├── public/
+│   ├── firebase-messaging-sw.template.js  # Service worker template
+│   └── firebase-messaging-sw.js          # Generated service worker
+└── scripts/
+    └── build-sw.js         # Build script for service worker
+```
+
+## 🎨 Features
+
+- ✅ **Real-time notifications** - Instant delivery
+- ✅ **Cross-platform** - Works on web, mobile browsers
+- ✅ **Custom actions** - Navigate, open URLs, refresh
+- ✅ **Background support** - Works when app is closed
+- ✅ **Token management** - Easy device targeting
+- ✅ **Environment-based config** - Secure deployment
+- ✅ **Form validation** - Prevents empty notifications
+- ✅ **Toast notifications** - User feedback
 
 ## 🤝 Contributing
 

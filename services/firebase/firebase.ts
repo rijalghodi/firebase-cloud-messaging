@@ -1,5 +1,6 @@
 // services/firebase/firebase.ts
-import { initializeApp, getApps } from 'firebase/app';
+import { getApps, initializeApp } from "firebase/app";
+import { getMessaging } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -12,4 +13,5 @@ const firebaseConfig = {
 
 const firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
+export const messaging = getMessaging(firebaseApp);
 export default firebaseApp;
