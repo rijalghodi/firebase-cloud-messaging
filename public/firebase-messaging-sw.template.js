@@ -3,13 +3,13 @@ importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-com
 
 // Firebase configuration - will be replaced by build process
 firebase.initializeApp({
-  apiKey: "AIzaSyCmltrMTVBDWqjw2KFHILIaAzyYEHk2Uj0",
-  authDomain: "todoin-da3fe.firebaseapp.com",
-  projectId: "todoin-da3fe",
-  storageBucket: "todoin-da3fe.firebasestorage.app",
-  messagingSenderId: "839854434662",
-  appId: "1:839854434662:web:3b4a4e632c354d22e1c0a7",
-  measurementId: "G-565R96N4Z7",
+  apiKey: "{{FIREBASE_API_KEY}}",
+  authDomain: "{{FIREBASE_AUTH_DOMAIN}}",
+  projectId: "{{FIREBASE_PROJECT_ID}}",
+  storageBucket: "{{FIREBASE_STORAGE_BUCKET}}",
+  messagingSenderId: "{{FIREBASE_MESSAGING_SENDER_ID}}",
+  appId: "{{FIREBASE_APP_ID}}",
+  measurementId: "{{FIREBASE_MEASUREMENT_ID}}",
 });
 
 const messaging = firebase.messaging();
