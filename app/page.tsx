@@ -1,12 +1,9 @@
 "use client";
 
 import { requestFCMToken, requestNotificationPermission, useForegroundNotifications } from "@/services/firebase/fcm";
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const queries = useSearchParams();
-  const id = queries.get("id");
   const [loading, setLoading] = useState(false);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -73,7 +70,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <div className="container max-w-3xl mx-auto px-4 py-8 flex flex-col gap-8">
-        <h1 className="text-3xl font-bold text-gray-800">Firebase Cloud Messaging DEMO</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Firebase Cloud Messaging Demo</h1>
 
         {/* Notification Permission */}
         <div className="space-y-2">
