@@ -100,22 +100,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* Target Token */}
-        <div className="space-y-2 flex flex-col items-start">
-          <h3 className="text-lg font-semibold text-gray-700">Target FCM Token:</h3>
-          <p className="text-sm text-gray-500">
-            A FCM token is a unique identifier for a device where the notification will be sent. If this is empty, then
-            notification will be sent to this device.
-          </p>
-          <textarea
-            value={targetToken}
-            onChange={(e) => setTargetToken(e.target.value)}
-            className="p-2 border border-gray-300 rounded-md w-full"
-            placeholder="Enter FCM Token"
-            rows={4}
-          />
-        </div>
-
         {/* Test Notifications */}
         <div className="space-y-2">
           <h3 className="text-lg font-semibold text-gray-700">Test Notifications:</h3>
@@ -158,6 +142,21 @@ export default function Home() {
             </button>
           </div>
           {loading && <p>Sending Notification...</p>}
+        </div>
+
+        {/* Target Device FCM Token */}
+        <div className="space-y-2 flex flex-col items-start">
+          <h3 className="text-lg font-semibold text-gray-700">FCM Token (Target Device)</h3>
+          <p className="text-sm text-gray-500">
+            Enter the FCM token of the device you want to send the notification to. Leave blank to send to this device.
+          </p>
+          <textarea
+            value={targetToken}
+            onChange={(e) => setTargetToken(e.target.value)}
+            className="p-2 border border-gray-300 rounded-md w-full"
+            placeholder="Enter FCM Token"
+            rows={4}
+          />
         </div>
 
         <footer className="text-sm text-gray-500 mt-10">
