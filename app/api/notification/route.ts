@@ -18,16 +18,13 @@ export async function POST(request: NextRequest) {
     const { token, type = "basic" } = await request.json();
 
     if (!token) {
-      return NextResponse.json(
-        { error: "FCM token is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "FCM token is required" }, { status: 400 });
     }
 
     let message: any = {
       token,
       notification: {
-        title: "Foreground Test",
+        title: "Test Notification",
         body: "This is a test notification",
       },
       data: {
@@ -67,7 +64,7 @@ export async function POST(request: NextRequest) {
 
       default:
         message.notification.title = "Basic Test";
-        message.notification.body = "This is a basic foreground notification";
+        message.notification.body = "This is a basic notification";
     }
 
     const response = await getMessaging().send(message);
@@ -79,9 +76,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error sending notification:", error);
-    return NextResponse.json(
-      { error: "Failed to send notification" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to send notification" }, { status: 500 });
   }
 }

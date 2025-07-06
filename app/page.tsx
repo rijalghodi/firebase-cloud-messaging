@@ -100,10 +100,21 @@ export default function Home() {
           )}
         </div>
 
-        {/* Test Notifications */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-gray-700">Test Notifications:</h3>
-          <p className="text-sm text-gray-500">Try to send notification to the target device.</p>
+        {/* Target Device FCM Token */}
+        <div className="space-y-2 flex flex-col items-start">
+          <h3 className="font-semibold text-gray-700">FCM Token of Target Device (Optional)</h3>
+          <p className="text-sm text-gray-500">
+            Enter the FCM token of the device you want to send the notification to. Leave blank to send to this device.
+          </p>
+          <textarea
+            value={targetToken}
+            onChange={(e) => setTargetToken(e.target.value)}
+            className="p-2 border border-gray-300 rounded-md w-full"
+            placeholder="Enter FCM Token"
+            rows={3}
+          />
+
+          {/* Notifications buttons */}
           <div className="space-y-4 space-x-2 items-center mt-5">
             <button
               className="bg-green-600 text-white rounded-full px-4 py-2"
@@ -142,21 +153,6 @@ export default function Home() {
             </button>
           </div>
           {loading && <p>Sending Notification...</p>}
-        </div>
-
-        {/* Target Device FCM Token */}
-        <div className="space-y-2 flex flex-col items-start">
-          <h3 className="text-lg font-semibold text-gray-700">FCM Token (Target Device)</h3>
-          <p className="text-sm text-gray-500">
-            Enter the FCM token of the device you want to send the notification to. Leave blank to send to this device.
-          </p>
-          <textarea
-            value={targetToken}
-            onChange={(e) => setTargetToken(e.target.value)}
-            className="p-2 border border-gray-300 rounded-md w-full"
-            placeholder="Enter FCM Token"
-            rows={4}
-          />
         </div>
 
         <footer className="text-sm text-gray-500 mt-10">
