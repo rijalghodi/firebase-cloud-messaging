@@ -22,14 +22,11 @@ export async function requestFCMToken(): Promise<string | null> {
 export function useForegroundNotifications() {
   useEffect(() => {
     const messaging = getMessaging(firebaseApp);
-
     const unsubscribe = onMessage(messaging, (payload: MessagePayload) => {
       console.log("Foreground message received:", payload);
-
       const title = payload.notification?.title || "";
       const body = payload.notification?.body || "";
       const data = payload.data;
-
       // Show the alert
       toast(title, {
         description: body,
@@ -41,7 +38,6 @@ export function useForegroundNotifications() {
         },
       });
     });
-
     return () => unsubscribe();
   }, []);
 }

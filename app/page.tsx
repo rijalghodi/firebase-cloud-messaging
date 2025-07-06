@@ -1,8 +1,8 @@
 "use client";
 
 import { requestFCMToken, requestNotificationPermission, useForegroundNotifications } from "@/services/firebase/fcm";
-import { messaging } from "@/services/firebase/firebase";
-import { deleteToken } from "firebase/messaging";
+import firebaseApp from "@/services/firebase/firebase";
+import { deleteToken, getMessaging } from "firebase/messaging";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -77,6 +77,7 @@ export default function Home() {
   const unsubscribeFCM = async () => {
     try {
       setLoadingSubscribe(true);
+      const messaging = getMessaging(firebaseApp);
       await deleteToken(messaging);
       setFcmToken(null);
     } catch (error) {
@@ -112,6 +113,14 @@ export default function Home() {
         <div className="w-full">
           {fcmToken ? (
             <div className="w-full flex flex-col gap-6">
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-medium text-center">Your Firebase Token (Auto-generated)</p>
+                <div className="flex items-end gap-2">
+                  <Input value={fcmToken} onChange={() => {}} readOnly />
+                  <CopyButton value={fcmToken} />
+                </div>
+              </div>
+
               <div className="flex justify-center w-full">
                 <button
                   className="bg-red-500 hover:bg-red-600 text-white"
@@ -120,14 +129,6 @@ export default function Home() {
                 >
                   {loadingSubscribe ? "Unsubscribing..." : "Unsubscribe Notifications"}
                 </button>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <p className="text-sm font-medium text-center">Your Firebase Token (Auto-generated)</p>
-                <div className="flex items-end gap-2">
-                  <Input value={fcmToken} onChange={() => {}} readOnly />
-                  <CopyButton value={fcmToken} />
-                </div>
               </div>
             </div>
           ) : (
