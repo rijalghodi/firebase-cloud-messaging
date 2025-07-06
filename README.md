@@ -11,7 +11,7 @@ A simple, working demo of Firebase Cloud Messaging (FCM) with Next.js. Send push
 
 ## 🚀 Live Demo
 
-Check out the live demo: [https://demo.com](https://demo.com)
+Check out the live demo: [https://firebase-cloud-messaging-demo.vercel.app/](https://firebase-cloud-messaging-demo.vercel.app/)
 
 ## 🎯 How to Test
 
@@ -86,44 +86,6 @@ npm run dev
 npm run build
 npm start
 ```
-
-## 🔧 How It Works
-
-### Foreground Notifications
-
-When the app is open, notifications appear as browser alerts with custom actions.
-
-### Background Notifications
-
-When the app is closed, the service worker shows system notifications that can open the app when clicked.
-
-### Cross-Device Messaging
-
-Each device gets a unique FCM token. Use this token to send notifications to specific devices.
-
-## 📁 Project Structure
-
-```
-├── app/
-│   ├── components/          # React components
-│   ├── api/                # API routes for sending notifications
-│   └── page.tsx            # Main demo page
-├── services/firebase/      # Firebase configuration
-├── public/
-│   ├── firebase-messaging-sw.template.js  # Service worker template
-│   └── firebase-messaging-sw.js          # Generated service worker
-└── scripts/
-    └── build-sw.js         # Build script for service worker
-```
-
-## 🎨 Features
-
-- ✅ **Real-time notifications** - Instant delivery
-- ✅ **Cross-platform** - Works on web, mobile browsers
-- ✅ **Custom actions** - Navigate, open URLs, refresh
-- ✅ **Background support** - Works when app is closed
-- ✅ **Token management** - Easy device targeting
-- ✅ **Environment-based config** - Secure deployment
 
 ## 🤝 Contributing
 
