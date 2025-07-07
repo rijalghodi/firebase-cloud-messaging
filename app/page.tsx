@@ -6,6 +6,7 @@ import { deleteToken, getMessaging } from "firebase/messaging";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+// Types
 interface NotificationInput {
   title: string;
   body: string;
@@ -14,6 +15,21 @@ interface NotificationInput {
   url: string;
 }
 
+interface InputProps {
+  label?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  readOnly?: boolean;
+  textArea?: boolean;
+  error?: string | null;
+}
+
+interface CopyButtonProps {
+  value: string;
+}
+
+// Main Component
 export default function Home() {
   const [sending, setSending] = useState(false);
   const [fcmToken, setFcmToken] = useState<string | null>(null);
@@ -25,12 +41,21 @@ export default function Home() {
     useCustomToken: false,
     url: "",
   });
+  const [requiredTokenError, setRequiredTokenError] = useState<string | null>(null);
 
   // Initialize foreground notifications
   useForegroundNotifications();
 
-  const sendNotification = async () => {
+  // Handlers
+  const handleSendNotification = async () => {
+    if (notifInput.useCustomToken && !notifInput.token) {
+      setRequiredTokenError("Please provide a token");
+      return;
+    }
+
+    setRequiredTokenError(null);
     setSending(true);
+
     try {
       const token = notifInput.useCustomToken ? notifInput.token : fcmToken || "";
       const response = await fetch("/api/notification", {
@@ -51,11 +76,12 @@ export default function Home() {
       toast.error("Failed to send notification", {
         description: error instanceof Error ? error.message : "Unknown error",
       });
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   };
 
-  const setupFCM = async () => {
+  const handleSetupFCM = async () => {
     try {
       setLoadingSubscribe(true);
       const permission = await requestNotificationPermission();
@@ -64,17 +90,18 @@ export default function Home() {
         const token = await requestFCMToken();
         if (token) {
           setFcmToken(token);
-          console.log("FCM Token:", token);
         }
       }
     } catch (error) {
-      console.error("Error setting up FCM:", error);
+      toast.error("Failed to subscribe notification", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setLoadingSubscribe(false);
     }
   };
 
-  const unsubscribeFCM = async () => {
+  const handleUnsubscribeFCM = async () => {
     try {
       setLoadingSubscribe(true);
       const messaging = getMessaging(firebaseApp);
@@ -87,12 +114,18 @@ export default function Home() {
     }
   };
 
-  const updateNotifInput = (field: keyof NotificationInput, value: string | boolean) => {
+  const handleUpdateNotifInput = (field: keyof NotificationInput, value: string | boolean) => {
     setNotifInput((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleTokenChange = (value: string) => {
+    setRequiredTokenError(null);
+    handleUpdateNotifInput("token", value);
+  };
+
+  // Effects
   useEffect(() => {
-    setupFCM();
+    handleSetupFCM();
 
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       navigator.serviceWorker
@@ -109,135 +142,188 @@ export default function Home() {
       <div className="container max-w-3xl mx-auto px-4 py-8 flex flex-col items-center gap-10">
         <h1 className="text-2xl font-bold text-gray-800 text-center">🔥 Firebase Cloud Messaging Demo</h1>
 
-        {/* FCM Token Management */}
-        <div className="w-full">
-          {fcmToken ? (
-            <div className="w-full flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                <p className="text-sm font-medium text-center">Your Firebase Token (Auto-generated)</p>
-                <div className="flex items-end gap-2">
-                  <Input value={fcmToken} onChange={() => {}} readOnly />
-                  <CopyButton value={fcmToken} />
-                </div>
-              </div>
+        <FCMTokenSection
+          fcmToken={fcmToken}
+          loadingSubscribe={loadingSubscribe}
+          onSubscribe={handleSetupFCM}
+          onUnsubscribe={handleUnsubscribeFCM}
+        />
 
-              <div className="flex justify-center w-full">
-                <button
-                  className="bg-red-500 hover:bg-red-600 text-white"
-                  onClick={unsubscribeFCM}
-                  disabled={loadingSubscribe}
-                >
-                  {loadingSubscribe ? "Unsubscribing..." : "Unsubscribe Notifications"}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center w-full">
-              <button
-                className="bg-gray-800 hover:bg-gray-700 text-white"
-                onClick={setupFCM}
-                disabled={loadingSubscribe}
-              >
-                {loadingSubscribe ? "Subscribing..." : "Subscribe to Notifications"}
-              </button>
-            </div>
-          )}
-        </div>
+        <NotificationForm
+          notifInput={notifInput}
+          requiredTokenError={requiredTokenError}
+          sending={sending}
+          onUpdateInput={handleUpdateNotifInput}
+          onTokenChange={handleTokenChange}
+          onSubmit={handleSendNotification}
+        />
 
-        {/* Notification Form */}
-        <form
-          className="space-y-4 flex flex-col items-start w-full p-6 border border-gray-200 shadow-lg rounded-xl"
-          onSubmit={(e) => {
-            e.preventDefault();
-            sendNotification();
-          }}
-        >
-          <h3 className="text-xl font-bold mb-4">Send Notification</h3>
-
-          <Input
-            label="Title"
-            value={notifInput.title}
-            onChange={(value) => updateNotifInput("title", value)}
-            placeholder="Enter notification title"
-          />
-
-          <Input
-            label="Body"
-            value={notifInput.body}
-            onChange={(value) => updateNotifInput("body", value)}
-            placeholder="Enter notification message"
-            textArea
-          />
-
-          <Input
-            label="URL (Optional)"
-            value={notifInput.url}
-            onChange={(value) => updateNotifInput("url", value)}
-            placeholder="https://example.com"
-          />
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="useCustomToken"
-              checked={notifInput.useCustomToken}
-              onChange={(e) => updateNotifInput("useCustomToken", e.target.checked)}
-            />
-            <label htmlFor="useCustomToken">Use Cross-Device Firebase Token</label>
-          </div>
-
-          {notifInput.useCustomToken && (
-            <Input
-              label="Firebase Token"
-              value={notifInput.token}
-              onChange={(value) => updateNotifInput("token", value)}
-              placeholder="Paste Firebase token from another device"
-            />
-          )}
-
-          <button className="bg-gray-800 hover:bg-gray-700 text-white mt-4" type="submit" disabled={sending}>
-            {sending ? "Sending..." : "Send Notification"}
-          </button>
-        </form>
-
-        <footer className="text-sm text-gray-500 mt-10">
-          Made by{" "}
-          <a href="https://github.com/rijalghodi" target="_blank" rel="noopener noreferrer" className="hover:underline">
-            Rijal Ghodi
-          </a>
-          <span className="text-gray-500 mx-2">|</span>
-          <a
-            href="https://github.com/rijalghodi/firebase-cloud-messaging"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
-          >
-            Github Repo
-          </a>
-        </footer>
+        <Footer />
       </div>
     </div>
   );
 }
 
-// Reusable Input Component
-function Input({
-  label,
-  value,
-  onChange,
-  placeholder,
-  readOnly,
-  textArea,
+// FCM Token Management Component
+function FCMTokenSection({
+  fcmToken,
+  loadingSubscribe,
+  onSubscribe,
+  onUnsubscribe,
 }: {
-  label?: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  readOnly?: boolean;
-  textArea?: boolean;
+  fcmToken: string | null;
+  loadingSubscribe: boolean;
+  onSubscribe: () => void;
+  onUnsubscribe: () => void;
 }) {
-  const inputClasses =
-    "p-1.5 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-gray-700";
+  return (
+    <div className="w-full">
+      {fcmToken ? (
+        <div className="w-full flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium text-center">Your Firebase Token (Auto-generated)</p>
+            <div className="flex items-end gap-2">
+              <Input value={fcmToken} onChange={() => {}} readOnly />
+              <CopyButton value={fcmToken} />
+            </div>
+          </div>
+
+          <div className="flex justify-center w-full">
+            <button
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors"
+              onClick={onUnsubscribe}
+              disabled={loadingSubscribe}
+            >
+              {loadingSubscribe ? "Unsubscribing..." : "Unsubscribe Notifications"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex justify-center w-full">
+          <button
+            className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
+            onClick={onSubscribe}
+            disabled={loadingSubscribe}
+          >
+            {loadingSubscribe ? "Subscribing..." : "Subscribe to Notifications"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Notification Form Component
+function NotificationForm({
+  notifInput,
+  requiredTokenError,
+  sending,
+  onUpdateInput,
+  onTokenChange,
+  onSubmit,
+}: {
+  notifInput: NotificationInput;
+  requiredTokenError: string | null;
+  sending: boolean;
+  onUpdateInput: (field: keyof NotificationInput, value: string | boolean) => void;
+  onTokenChange: (value: string) => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <form
+      className="space-y-4 flex flex-col items-start w-full p-6 border border-gray-200 shadow-lg rounded-xl"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
+      <h3 className="text-xl font-bold mb-4">Send Notification</h3>
+
+      <Input
+        label="Title"
+        value={notifInput.title}
+        onChange={(value) => onUpdateInput("title", value)}
+        placeholder="Enter notification title"
+      />
+
+      <Input
+        label="Body"
+        value={notifInput.body}
+        onChange={(value) => onUpdateInput("body", value)}
+        placeholder="Enter notification message"
+        textArea
+      />
+
+      <Input
+        label="URL (Optional)"
+        value={notifInput.url}
+        onChange={(value) => onUpdateInput("url", value)}
+        placeholder="https://example.com"
+      />
+
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="useCustomToken"
+          checked={notifInput.useCustomToken}
+          onChange={(e) => onUpdateInput("useCustomToken", e.target.checked)}
+        />
+        <label htmlFor="useCustomToken">Use Cross-Device Firebase Token</label>
+      </div>
+
+      {notifInput.useCustomToken && (
+        <Input
+          label="Firebase Token"
+          value={notifInput.token}
+          onChange={onTokenChange}
+          placeholder="Paste Firebase token from another device"
+          error={requiredTokenError}
+        />
+      )}
+
+      <button
+        className="bg-gray-800 hover:bg-gray-700 text-white mt-4 px-4 py-2 rounded-lg transition-colors"
+        type="submit"
+        disabled={sending}
+      >
+        {sending ? "Sending..." : "Send Notification"}
+      </button>
+    </form>
+  );
+}
+
+// Footer Component
+function Footer() {
+  return (
+    <footer className="text-sm text-gray-500 mt-10">
+      Made by{" "}
+      <a
+        href="https://github.com/rijalghodi"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:underline text-gray-800"
+      >
+        Rijal Ghodi
+      </a>
+      <span className="text-gray-500 mx-2">|</span>
+      <a
+        href="https://github.com/rijalghodi/firebase-cloud-messaging"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:underline text-gray-800"
+      >
+        Github Repo
+      </a>
+    </footer>
+  );
+}
+
+// Reusable Input Component
+function Input({ label, value, onChange, placeholder, readOnly, textArea, error }: InputProps) {
+  const inputClasses = [
+    "p-1.5 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-1 focus:ring-gray-800 transition-colors",
+    error ? "border-red-500 focus:ring-red-500" : "",
+  ].join(" ");
 
   return (
     <div className="w-full space-y-1.5">
@@ -260,12 +346,13 @@ function Input({
           readOnly={readOnly}
         />
       )}
+      {error && <p className="text-red-500 text-sm">{error}</p>}
     </div>
   );
 }
 
 // Copy Button Component
-function CopyButton({ value }: { value: string }) {
+function CopyButton({ value }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -274,12 +361,17 @@ function CopyButton({ value }: { value: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1000);
     } catch (error) {
-      console.error("Failed to copy:", error);
+      toast.error("Failed to copy", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   };
 
   return (
-    <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 w-20" onClick={handleCopy}>
+    <button
+      className="bg-gray-200 hover:bg-gray-300 text-gray-800 w-20 px-4 py-2 rounded-lg transition-colors"
+      onClick={handleCopy}
+    >
       {copied ? "Copied" : "Copy"}
     </button>
   );
